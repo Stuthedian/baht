@@ -4,11 +4,14 @@
 #include <errno.h>
 #include <stdlib.h>
 #include <string.h>
+#include <signal.h>
 
 #define MAX_ERRNUM 256
 
 #define BAHT_IS_NULL_ERRNO == NULL ? baht_print_error_message_and_exit(__FILE__,  __LINE__, errno) : 0;
 #define BAHT_IS_ERRNUM [errnum_array] = 1; baht_find_errnum(__FILE__, __LINE__);
+
+static void baht_handle_sigabort(int signum);
 
 #endif //BAHT_H
 
@@ -32,13 +35,13 @@ static void baht_print_error_message_and_exit(char* filename, int line, int errn
 		else
 			fputs("strerror_r failed. Unknown failure", stderr);
     fprintf(stderr, "<%s>,  line %d\n", filename, line);
-		exit(EXIT_FAILURE);
+    abort();
 	}
 	fprintf(stderr, "<%s>,  line %d: %s\n", filename, line, buf);
 #else//GNU version
 	fprintf(stderr, "<%s>,  line %d: %s\n", filename, line, strerror_r(errnum, buf, 256));
 #endif
-	exit(EXIT_FAILURE);
+  abort();
 }
 
 static void baht_find_errnum(char* filename, int line)
@@ -61,13 +64,30 @@ static void baht_find_errnum(char* filename, int line)
     if(errnum_array[0] != 1)
     {
       fprintf(stderr, "<%s>,  line %d: Improper use of a macro: memory corruption detected\n", filename, line);
-      exit(EXIT_FAILURE);
+      abort();
     }
 
     errnum_array[0] = 0;
   }
   else
       baht_print_error_message_and_exit(filename, line, errnum);
+}
+
+static void baht_catch_sigabort()
+{
+  struct sigaction catch_signal;
+  catch_signal.sa_handler = baht_handle_sigabort;
+  sigaction(SIGABRT, &catch_signal, NULL);
+}
+
+static void baht_handle_sigabort(int signum)
+{
+  sigaction(SIGABRT, NULL, NULL);
+  puts("Received sigabort signal");
+  puts("Waiting for any signal to arrive");
+  sigset_t set;
+  sigemptyset(&set);
+  sigsuspend(&set);
 }
 
 #endif //BAHT_IMPLEMENTATION
