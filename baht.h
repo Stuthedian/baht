@@ -12,6 +12,7 @@
 #define BAHT_IS_ERRNUM [errnum_array] = 1; baht_find_errnum(__FILE__, __LINE__);
 
 static void baht_handle_sigabort(int signum);
+static void baht_handle_sigsegv(int signum);
 
 #endif //BAHT_H
 
@@ -77,13 +78,30 @@ static void baht_catch_sigabort()
 {
   struct sigaction catch_signal;
   catch_signal.sa_handler = baht_handle_sigabort;
-  sigaction(SIGABRT, &catch_signal, NULL);
+  sigaction(SIGABRT, &catch_signal, NULL);//check return value
+}
+
+static void baht_catch_sigsegv()
+{
+  struct sigaction catch_signal;
+  catch_signal.sa_handler = baht_handle_sigsegv;
+  sigaction(SIGSEGV, &catch_signal, NULL);//check return value
 }
 
 static void baht_handle_sigabort(int signum)
 {
   sigaction(SIGABRT, NULL, NULL);
   puts("Received sigabort signal");
+  puts("Waiting for any signal to arrive");
+  sigset_t set;
+  sigemptyset(&set);
+  sigsuspend(&set);
+}
+
+static void baht_handle_sigsegv(int signum)
+{
+  sigaction(SIGSEGV, NULL, NULL);
+  puts("Received sigsegv signal");
   puts("Waiting for any signal to arrive");
   sigset_t set;
   sigemptyset(&set);
