@@ -8,6 +8,7 @@
 
 #define MAX_ERRNUM 256
 
+#define BAHT_IS_NEG_1_ERRNO == -1 ? baht_print_error_message_and_exit(__FILE__,  __LINE__, errno) : 0;
 #define BAHT_IS_NULL_ERRNO == NULL ? baht_print_error_message_and_exit(__FILE__,  __LINE__, errno) : 0;
 #define BAHT_IS_ERRNUM [errnum_array] = 1; baht_find_errnum(__FILE__, __LINE__);
 
@@ -34,7 +35,7 @@ static void baht_print_error_message_and_exit(char* filename, int line, int errn
 		else if(status == -1)
 			fprintf(stderr, "strerror_r failed. Error number is: %d\n", errno);
 		else
-			fputs("strerror_r failed. Unknown failure", stderr);
+			fputs("strerror_r failed. Unknown failure\n", stderr);
     fprintf(stderr, "<%s>,  line %d\n", filename, line);
     abort();
 	}
@@ -78,21 +79,21 @@ static void baht_catch_sigabort()
 {
   struct sigaction catch_signal;
   catch_signal.sa_handler = baht_handle_sigabort;
-  sigaction(SIGABRT, &catch_signal, NULL);//check return value
+  sigaction(SIGABRT, &catch_signal, NULL) BAHT_IS_NEG_1_ERRNO;
 }
 
 static void baht_catch_sigsegv()
 {
   struct sigaction catch_signal;
   catch_signal.sa_handler = baht_handle_sigsegv;
-  sigaction(SIGSEGV, &catch_signal, NULL);//check return value
+  sigaction(SIGSEGV, &catch_signal, NULL) BAHT_IS_NEG_1_ERRNO;
 }
 
 static void baht_handle_sigabort(int signum)
 {
   sigaction(SIGABRT, NULL, NULL);
-  puts("Received sigabort signal");
-  puts("Waiting for any signal to arrive");
+  fputs("Received sigabort signal\n", stderr);
+  fputs("Waiting for any signal to arrive\n", stderr);
   sigset_t set;
   sigemptyset(&set);
   sigsuspend(&set);
@@ -101,8 +102,8 @@ static void baht_handle_sigabort(int signum)
 static void baht_handle_sigsegv(int signum)
 {
   sigaction(SIGSEGV, NULL, NULL);
-  puts("Received sigsegv signal");
-  puts("Waiting for any signal to arrive");
+  fputs("Received sigsegv signal\n", stderr);
+  fputs("Waiting for any signal to arrive\n", stderr);
   sigset_t set;
   sigemptyset(&set);
   sigsuspend(&set);
