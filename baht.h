@@ -5,14 +5,19 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define BAHT_IS_NULL_ERRNO == NULL ? print_error_message_and_exit(__FILE__,  __LINE__, errno) : 0;
+#define MAX_ERRNUM 256
+
+#define BAHT_IS_NULL_ERRNO == NULL ? baht_print_error_message_and_exit(__FILE__,  __LINE__, errno) : 0;
+#define BAHT_IS_ERRNUM [errnum_array] = 1; baht_find_errnum(__FILE__, __LINE__);
 
 #endif //BAHT_H
 
 #ifdef BAHT_IMPLEMENTATION
 #undef BAHT_IMPLEMENTATION
 
-static void print_error_message_and_exit(char* filename, int line, int errnum)
+static __thread char errnum_array[MAX_ERRNUM];
+
+static void baht_print_error_message_and_exit(char* filename, int line, int errnum)
 {
 	char buf[256];
 
@@ -34,6 +39,35 @@ static void print_error_message_and_exit(char* filename, int line, int errnum)
 	fprintf(stderr, "<%s>,  line %d: %s\n", filename, line, strerror_r(errnum, buf, 256));
 #endif
 	exit(EXIT_FAILURE);
+}
+
+static void baht_find_errnum(char* filename, int line)
+{
+  int errnum = -1;
+
+  //0-th element means success
+  for(int i = 1; i < MAX_ERRNUM; i++)
+  {
+    if(errnum_array[i] == 1)
+    {
+      errnum = i;
+      break;
+    }
+  }
+  if(errnum == -1)
+  {
+    /*this means that we indexed an array element
+    out of its bounds - memory corruption occured*/
+    if(errnum_array[0] != 1)
+    {
+      fprintf(stderr, "<%s>,  line %d: Improper use of a macro: memory corruption detected\n", filename, line);
+      exit(EXIT_FAILURE);
+    }
+
+    errnum_array[0] = 0;
+  }
+  else
+      baht_print_error_message_and_exit(filename, line, errnum);
 }
 
 #endif //BAHT_IMPLEMENTATION
