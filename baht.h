@@ -1,0 +1,7 @@
+#ifndef BAHT_H
+#define BAHT_H
+#endif //BAHT_H
+
+#ifdef BAHT_IMPLEMENTATION
+#undef BAHT_IMPLEMENTATION
+#endif //BAHT_IMPLEMENTATION
