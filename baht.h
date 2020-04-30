@@ -11,6 +11,7 @@
 
 #define BAHT_IS_NEG_1_ERRNO == -1 ? baht_print_error_message(__FILE__,  __LINE__, errno) : 0;
 #define BAHT_IS_NULL_ERRNO == NULL ? baht_print_error_message(__FILE__,  __LINE__, errno) : 0;
+#define BAHT_IS_EOF_ERRNO == EOF ? baht_print_error_message(__FILE__,  __LINE__, errno) : 0;
 #define BAHT_IS_NULL == NULL ? baht_print_null_error_message(__FILE__,  __LINE__) : 0;
 #define BAHT_IS_ERRNUM [errnum_array] = 1; baht_find_errnum(__FILE__, __LINE__);
 
