@@ -8,8 +8,9 @@
 
 #define MAX_ERRNUM 256
 
-#define BAHT_IS_NEG_1_ERRNO == -1 ? baht_print_error_message_and_exit(__FILE__,  __LINE__, errno) : 0;
-#define BAHT_IS_NULL_ERRNO == NULL ? baht_print_error_message_and_exit(__FILE__,  __LINE__, errno) : 0;
+#define BAHT_IS_NEG_1_ERRNO == -1 ? baht_print_error_message(__FILE__,  __LINE__, errno) : 0;
+#define BAHT_IS_NULL_ERRNO == NULL ? baht_print_error_message(__FILE__,  __LINE__, errno) : 0;
+#define BAHT_IS_NULL == NULL ? baht_print_null_error_message(__FILE__,  __LINE__) : 0;
 #define BAHT_IS_ERRNUM [errnum_array] = 1; baht_find_errnum(__FILE__, __LINE__);
 
 static void baht_handle_sigabort(int signum);
@@ -19,10 +20,9 @@ static void baht_handle_sigsegv(int signum);
 
 #ifdef BAHT_IMPLEMENTATION
 #undef BAHT_IMPLEMENTATION
-
 static __thread char errnum_array[MAX_ERRNUM];
 
-static void baht_print_error_message_and_exit(char* filename, int line, int errnum)
+static void baht_print_error_message(char* filename, int line, int errnum)
 {
 	char buf[256];
 
@@ -43,6 +43,12 @@ static void baht_print_error_message_and_exit(char* filename, int line, int errn
 #else//GNU version
 	fprintf(stderr, "<%s>,  line %d: %s\n", filename, line, strerror_r(errnum, buf, 256));
 #endif
+  abort();
+}
+
+static void baht_print_null_error_message(char* filename, int line)
+{
+  fprintf(stderr, "<%s>,  line %d: NULL pointer\n", filename, line);
   abort();
 }
 
@@ -72,7 +78,7 @@ static void baht_find_errnum(char* filename, int line)
     errnum_array[0] = 0;
   }
   else
-      baht_print_error_message_and_exit(filename, line, errnum);
+      baht_print_error_message(filename, line, errnum);
 }
 
 static void baht_catch_sigabort()
