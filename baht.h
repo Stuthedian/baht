@@ -2,9 +2,10 @@
 #define BAHT_H
 
 #include <errno.h>
+#include <signal.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <signal.h>
 
 #define MAX_ERRNUM 256
 
