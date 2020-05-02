@@ -21,6 +21,8 @@
 #endif //BAHT_NCURSES
 
 extern __thread char errnum_array[BAHT_MAX_ERRNUM];
+
+void baht_init();
 void baht_print_error_message(char* filename, int line, int errnum);
 void baht_print_custom_error_message(char* filename, int line, char* error_message);
 void baht_find_errnum(char* filename, int line);
