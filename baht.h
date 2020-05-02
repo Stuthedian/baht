@@ -32,29 +32,34 @@ static void baht_handle_sigsegv(int signum);
 
 #ifdef BAHT_IMPLEMENTATION
 #undef BAHT_IMPLEMENTATION
-static __thread char errnum_array[BAHT_MAX_ERRNUM];
+
+char errnum_desc_array[BAHT_MAX_ERRNUM][BAHT_MAX_DESC_LEN];
+__thread char errnum_array[BAHT_MAX_ERRNUM];
+
+void baht_init()
+{
+  char* error_desc;
+
+  memset(errnum_array, 0, BAHT_MAX_ERRNUM);
+  memset(errnum_desc_array, 0, BAHT_MAX_ERRNUM * BAHT_MAX_DESC_LEN);
+
+  for(int i = 0; i < BAHT_MAX_ERRNUM; i++)
+  {
+    error_desc = strerror(i);
+    strncpy(errnum_desc_array[i], error_desc, BAHT_MAX_DESC_LEN);
+    errnum_desc_array[i][BAHT_MAX_DESC_LEN - 1] = '\0';
+  }
+}
 
 void baht_print_error_message(char* filename, int line, int errnum)
 {
-	char buf[BAHT_MAX_DESC_LEN];
+  if(errnum >= 0 && errnum < BAHT_MAX_ERRNUM)
+    fprintf(stderr, "<%s>,  line %d: %s\n", filename, line,
+        errnum_desc_array[errnum]);
+  else
+    fprintf(stderr, "<%s>,  line %d: Unknown error %d\n", filename, line,
+        errnum);
 
-#if (_POSIX_C_SOURCE >= 200112L) && !  _GNU_SOURCE //XSI version
-	int status = strerror_r(errnum, buf, BAHT_MAX_DESC_LEN);
-	if(status != 0)
-	{
-		if(status > 0)
-			fprintf(stderr, "strerror_r failed. Error number is: %d\n", status);
-		else if(status == -1)
-			fprintf(stderr, "strerror_r failed. Error number is: %d\n", errno);
-		else
-			fputs("strerror_r failed. Unknown failure\n", stderr);
-    fprintf(stderr, "<%s>,  line %d\n", filename, line);
-    abort();
-	}
-	fprintf(stderr, "<%s>,  line %d: %s\n", filename, line, buf);
-#else//GNU version
-	fprintf(stderr, "<%s>,  line %d: %s\n", filename, line, strerror_r(errnum, buf, BAHT_MAX_DESC_LEN));
-#endif
   abort();
 }
 
