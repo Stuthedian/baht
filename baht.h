@@ -26,8 +26,8 @@ void baht_print_custom_error_message(char* filename, int line, char* error_messa
 void baht_find_errnum(char* filename, int line);
 void baht_catch_sigabort();
 void baht_catch_sigsegv();
-static void baht_handle_sigabort(int signum);
-static void baht_handle_sigsegv(int signum);
+void baht_handle_sigabort(int signum);
+void baht_handle_sigsegv(int signum);
 
 #endif //BAHT_H
 
@@ -113,7 +113,7 @@ void baht_catch_sigsegv()
   sigaction(SIGSEGV, &catch_signal, NULL) BAHT_IS_NEG_1_ERRNO;
 }
 
-static void baht_handle_sigabort(int signum)
+void baht_handle_sigabort(int signum)
 {
   sigaction(SIGABRT, NULL, NULL);
   fputs("Received sigabort signal\n", stderr);
@@ -123,7 +123,7 @@ static void baht_handle_sigabort(int signum)
   sigsuspend(&set);
 }
 
-static void baht_handle_sigsegv(int signum)
+void baht_handle_sigsegv(int signum)
 {
   sigaction(SIGSEGV, NULL, NULL);
   fputs("Received sigsegv signal\n", stderr);
