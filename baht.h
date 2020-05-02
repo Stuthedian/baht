@@ -7,7 +7,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define MAX_ERRNUM 256
+#define BAHT_MAX_ERRNUM 256
+#define BAHT_MAX_DESC_LEN 256
 
 #define BAHT_IS_NEG_1_ERRNO == -1 ? baht_print_error_message(__FILE__,  __LINE__, errno) : 0;
 #define BAHT_IS_NULL_ERRNO == NULL ? baht_print_error_message(__FILE__,  __LINE__, errno) : 0;
@@ -31,14 +32,14 @@ static void baht_handle_sigsegv(int signum);
 
 #ifdef BAHT_IMPLEMENTATION
 #undef BAHT_IMPLEMENTATION
-static __thread char errnum_array[MAX_ERRNUM];
+static __thread char errnum_array[BAHT_MAX_ERRNUM];
 
 void baht_print_error_message(char* filename, int line, int errnum)
 {
-	char buf[256];
+	char buf[BAHT_MAX_DESC_LEN];
 
 #if (_POSIX_C_SOURCE >= 200112L) && !  _GNU_SOURCE //XSI version
-	int status = strerror_r(errnum, buf, 256);
+	int status = strerror_r(errnum, buf, BAHT_MAX_DESC_LEN);
 	if(status != 0)
 	{
 		if(status > 0)
@@ -52,7 +53,7 @@ void baht_print_error_message(char* filename, int line, int errnum)
 	}
 	fprintf(stderr, "<%s>,  line %d: %s\n", filename, line, buf);
 #else//GNU version
-	fprintf(stderr, "<%s>,  line %d: %s\n", filename, line, strerror_r(errnum, buf, 256));
+	fprintf(stderr, "<%s>,  line %d: %s\n", filename, line, strerror_r(errnum, buf, BAHT_MAX_DESC_LEN));
 #endif
   abort();
 }
@@ -68,7 +69,7 @@ void baht_find_errnum(char* filename, int line)
   int errnum = -1;
 
   //0-th element means success
-  for(int i = 1; i < MAX_ERRNUM; i++)
+  for(int i = 1; i < BAHT_MAX_ERRNUM; i++)
   {
     if(errnum_array[i] == 1)
     {
