@@ -20,6 +20,7 @@
 #define BAHT_IS_ERR == ERR ? baht_print_custom_error_message(__FILE__,  __LINE__, "Ncurses error") : 0;
 #endif //BAHT_NCURSES
 
+extern __thread char errnum_array[BAHT_MAX_ERRNUM];
 void baht_print_error_message(char* filename, int line, int errnum);
 void baht_print_custom_error_message(char* filename, int line, char* error_message);
 void baht_find_errnum(char* filename, int line);
