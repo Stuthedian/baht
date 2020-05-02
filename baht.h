@@ -19,6 +19,11 @@
 #define BAHT_IS_ERR == ERR ? baht_print_custom_error_message(__FILE__,  __LINE__, "Ncurses error") : 0;
 #endif //BAHT_NCURSES
 
+void baht_print_error_message(char* filename, int line, int errnum);
+void baht_print_custom_error_message(char* filename, int line, char* error_message);
+void baht_find_errnum(char* filename, int line);
+void baht_catch_sigabort();
+void baht_catch_sigsegv();
 static void baht_handle_sigabort(int signum);
 static void baht_handle_sigsegv(int signum);
 
@@ -28,7 +33,7 @@ static void baht_handle_sigsegv(int signum);
 #undef BAHT_IMPLEMENTATION
 static __thread char errnum_array[MAX_ERRNUM];
 
-static void baht_print_error_message(char* filename, int line, int errnum)
+void baht_print_error_message(char* filename, int line, int errnum)
 {
 	char buf[256];
 
@@ -52,13 +57,13 @@ static void baht_print_error_message(char* filename, int line, int errnum)
   abort();
 }
 
-static void baht_print_custom_error_message(char* filename, int line, char* error_message)
+void baht_print_custom_error_message(char* filename, int line, char* error_message)
 {
   fprintf(stderr, "<%s>,  line %d: %s\n", filename, line, error_message);
   abort();
 }
 
-static void baht_find_errnum(char* filename, int line)
+void baht_find_errnum(char* filename, int line)
 {
   int errnum = -1;
 
@@ -87,14 +92,14 @@ static void baht_find_errnum(char* filename, int line)
       baht_print_error_message(filename, line, errnum);
 }
 
-static void baht_catch_sigabort()
+void baht_catch_sigabort()
 {
   struct sigaction catch_signal;
   catch_signal.sa_handler = baht_handle_sigabort;
   sigaction(SIGABRT, &catch_signal, NULL) BAHT_IS_NEG_1_ERRNO;
 }
 
-static void baht_catch_sigsegv()
+void baht_catch_sigsegv()
 {
   struct sigaction catch_signal;
   catch_signal.sa_handler = baht_handle_sigsegv;
