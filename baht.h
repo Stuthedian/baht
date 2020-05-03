@@ -1,7 +1,10 @@
 #ifndef BAHT_H
 #define BAHT_H
 
+#ifndef _POSIX_C_SOURCE
 #define _POSIX_C_SOURCE 1
+#endif
+
 #include <errno.h>
 #include <signal.h>
 #include <stdio.h>
