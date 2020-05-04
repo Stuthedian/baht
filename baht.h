@@ -107,14 +107,14 @@ void baht_find_errnum(char* filename, int line)
 
 void baht_catch_sigabort()
 {
-  struct sigaction catch_signal;
+  struct sigaction catch_signal = {0};
   catch_signal.sa_handler = baht_handle_sigabort;
   sigaction(SIGABRT, &catch_signal, NULL) BAHT_IS_NEG_1_ERRNO;
 }
 
 void baht_catch_sigsegv()
 {
-  struct sigaction catch_signal;
+  struct sigaction catch_signal = {0};
   catch_signal.sa_handler = baht_handle_sigsegv;
   sigaction(SIGSEGV, &catch_signal, NULL) BAHT_IS_NEG_1_ERRNO;
 }
