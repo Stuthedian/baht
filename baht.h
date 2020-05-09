@@ -1,8 +1,8 @@
 #ifndef BAHT_H
 #define BAHT_H
 
-#ifndef _POSIX_C_SOURCE
-#define _POSIX_C_SOURCE 1
+#if !defined _POSIX_C_SOURCE || _POSIX_C_SOURCE < 2
+#define _POSIX_C_SOURCE 2
 #endif
 
 #include <errno.h>
@@ -13,6 +13,8 @@
 
 #define BAHT_MAX_ERRNUM 256
 #define BAHT_MAX_DESC_LEN 256
+#define BAHT_MAX_SIGNAL_NAME_LEN 32
+#define BAHT_COMMAND_BUFFER_SIZE 32
 
 #define BAHT_IS_NEG_1_ERRNO == -1 ? baht_print_error_message(__FILE__,  __LINE__, errno) : 0;
 #define BAHT_IS_NULL_ERRNO == NULL ? baht_print_error_message(__FILE__,  __LINE__, errno) : 0;
@@ -30,10 +32,8 @@ void baht_init();
 void baht_print_error_message(char* filename, int line, int errnum);
 void baht_print_custom_error_message(char* filename, int line, char* error_message);
 void baht_find_errnum(char* filename, int line);
-void baht_catch_sigabort();
-void baht_catch_sigsegv();
-void baht_handle_sigabort(int signum);
-void baht_handle_sigsegv(int signum);
+void baht_catch_signal(int signum);
+void baht_handle_signal(int signum);
 
 #endif //BAHT_H
 
@@ -105,35 +105,52 @@ void baht_find_errnum(char* filename, int line)
       baht_print_error_message(filename, line, errnum);
 }
 
-void baht_catch_sigabort()
+void baht_catch_signal(int signum)
 {
   struct sigaction catch_signal = {0};
-  catch_signal.sa_handler = baht_handle_sigabort;
-  sigaction(SIGABRT, &catch_signal, NULL) BAHT_IS_NEG_1_ERRNO;
+  catch_signal.sa_handler = baht_handle_signal;
+  sigaction(signum, &catch_signal, NULL) BAHT_IS_NEG_1_ERRNO;
 }
 
-void baht_catch_sigsegv()
+void baht_handle_signal(int signum)
 {
-  struct sigaction catch_signal = {0};
-  catch_signal.sa_handler = baht_handle_sigsegv;
-  sigaction(SIGSEGV, &catch_signal, NULL) BAHT_IS_NEG_1_ERRNO;
-}
+  sigaction(signum, NULL, NULL);
 
-void baht_handle_sigabort(int signum)
-{
-  sigaction(SIGABRT, NULL, NULL);
-  fputs("Received sigabort signal\n", stderr);
-  fputs("Waiting for any signal to arrive\n", stderr);
-  sigset_t set;
-  sigemptyset(&set);
-  sigsuspend(&set);
-}
+  int is_get_signal_name_succedeed = 0;
+  char cmd[BAHT_COMMAND_BUFFER_SIZE] = {0};
+  char signal_name[BAHT_MAX_SIGNAL_NAME_LEN] = {0};
 
-void baht_handle_sigsegv(int signum)
-{
-  sigaction(SIGSEGV, NULL, NULL);
-  fputs("Received sigsegv signal\n", stderr);
-  fputs("Waiting for any signal to arrive\n", stderr);
+  snprintf(cmd, BAHT_COMMAND_BUFFER_SIZE, "kill -l %d", signum);
+
+  FILE* pipe = popen(cmd, "r");
+
+  if(pipe == NULL)
+    goto EXIT;
+
+  if(fgets(signal_name, BAHT_MAX_SIGNAL_NAME_LEN, pipe) == NULL)
+    goto EXIT;
+
+  if(pclose(pipe) == -1)
+    goto EXIT;
+
+  is_get_signal_name_succedeed = 1;
+  for(int i = 0; i < BAHT_MAX_SIGNAL_NAME_LEN; i++)
+  {
+    if(signal_name[i] == '\n')
+    {
+      signal_name[i] = '\0';
+      break;
+    }
+  }
+
+EXIT:
+  if(is_get_signal_name_succedeed)
+    fprintf(stderr, "Received signal: SIG%s. %s\n", signal_name,
+        "Waiting for any signal to arrive");
+  else
+    fprintf(stderr, "Received signal. Signal number is: %d. %s\n",
+        signum, "Waiting for any signal to arrive");
+
   sigset_t set;
   sigemptyset(&set);
   sigsuspend(&set);
