@@ -1,8 +1,8 @@
 #ifndef BAHT_H
 #define BAHT_H
 
-#if !defined _POSIX_C_SOURCE || _POSIX_C_SOURCE < 2
-#define _POSIX_C_SOURCE 2
+#if !defined _POSIX_C_SOURCE || _POSIX_C_SOURCE < 200809L
+#define _POSIX_C_SOURCE 200809L
 #endif
 
 #include <errno.h>
@@ -109,13 +109,12 @@ void baht_catch_signal(int signum)
 {
   struct sigaction catch_signal = {0};
   catch_signal.sa_handler = baht_handle_signal;
+  catch_signal.sa_flags = SA_NODEFER | SA_RESETHAND;
   sigaction(signum, &catch_signal, NULL) BAHT_IS_NEG_1_ERRNO;
 }
 
 void baht_handle_signal(int signum)
 {
-  sigaction(signum, NULL, NULL);
-
   int is_get_signal_name_succedeed = 0;
   char cmd[BAHT_COMMAND_BUFFER_SIZE] = {0};
   char signal_name[BAHT_MAX_SIGNAL_NAME_LEN] = {0};
