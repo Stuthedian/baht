@@ -16,6 +16,8 @@ Using these macros is very simple. Write them after function call. You can omit 
 ```c
 foo() BAHT_IS_NULL_ERRNO;
 ```
+
+## Available macros
 | Macro        | Triggered if return value equals to|  Uses `errno`  | Functions to check  |
 | ------------- |:-------------:| :-----:| ----|
 | `BAHT_IS_NEG_1_ERRNO`      | -1 | yes | most c standard library functions  |
