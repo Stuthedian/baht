@@ -29,3 +29,4 @@ foo() BAHT_IS_NULL_ERRNO;
              
 To brought macro `BAHT_IS_ERR` define `BAHT_NCURSES`
 
+All macros in case of error will print diagnostic message and call `abort()` which could be caught by `baht_catch_signal(SIGABRT)`
