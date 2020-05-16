@@ -40,7 +40,7 @@ baht_init();
 baht_catch_signal(SIGABRT);
 baht_catch_signal(SIGSEGV);
 ```
-* When signal is caught you would see message "Received signal..."
+* When signal is caught you would see message *"Received signal..."*
 * Now it is time to launct gdb, just do ``sudo gdb -p `pgrep <process_name>` ``
 * By default you will be in depth of system calls. Type `bt` to show backtrace
 * Then type `frame <frame_number>` to select interesting stack frame
@@ -95,4 +95,26 @@ unlink(sock_path) BAHT_IS_NEG_1_ERRNO;
 mq_close(que_id) BAHT_IS_NEG_1_ERRNO;
 mq_unlink(que_name) BAHT_IS_NEG_1_ERRNO;
 ```
+## Troubleshooting
+> *"Improper use of a macro: memory corruption detected"*
+
+It means that you are applying macro `BAHT_IS_ERRNUM` to a function which returns 
+value greater than `BAHT_MAX_ERRNUM` or less than 0 — thus corrupting memory.
+Maybe you should use another baht macro or do manual error handling.
+
+
+> *"Void value not ignored as it ought to be"*
+
+Apply macro to a variable that holds return value instead of function e. g. break up line of a form:
+```c
+int a = foo() BAHT_IS_NEG_1_ERRNO;
+```
+to two lines:
+```c
+int a = foo();
+a BAHT_IS_NEG_1_ERRNO;
+```
+In case of macro `BAHT_IS_ERRNUM` you might get warning *"unused variable ‘<variable_name>’"*.
+To get rid of this warning follow the procedure above.
+
 
