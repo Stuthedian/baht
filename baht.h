@@ -1,3 +1,7 @@
+//
+// Copyright (c) 2020 Stuthedian. All rights reserved.
+// Licensed under the MIT.
+//
 #ifndef BAHT_H
 #define BAHT_H
 
