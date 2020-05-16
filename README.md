@@ -48,4 +48,51 @@ baht_catch_signal(SIGSEGV);
 
 ### SIGINT == reset
 Side-effect for ncurses users — sending SIGINT (or SIGTERM) to the program when it is in signal pending
-state causes terminal screen to be cleared — much like calling `reset` in shell
+state causes terminal screen to be cleared — much like calling `reset` in shell.
+
+## Why postfix?
+Personal bias, because for me postfix approach looks much more readable.
+Let's look at the alternative approaches.
+
+### 'garmoshka'
+Too much screen estate is just wasted but this approach has clear advantage of customization — for every small error you can provide distinct error message:
+```c
+if(close(stream_socket) == -1)
+{
+  puts("Yowza! close failed!");
+  exit(EXIT_FAILURE);
+}
+if(unlink(sock_path) == -1)
+{
+  puts("Yowza! unlink failed!");
+  exit(EXIT_FAILURE);
+}
+if(mq_close(que_id) == -1)
+{
+  puts("Yowza! mq_close failed!");
+  exit(EXIT_FAILURE);
+}
+if(mq_unlink(que_name) == -1)
+{
+  puts("Yowza! mq_unlink failed!");
+  exit(EXIT_FAILURE);
+}
+```
+### macro first
+Conventional way of generalizing error handling. If you like me — reading
+from left to right the first thing you will encounter is a macro. Because of this it will create 'wasted columns' effect if checks did call after call:
+```c
+err_if_neg_1(close(stream_socket));
+err_if_neg_1(unlink(sock_path));
+err_if_neg_1(mq_close(que_id));
+err_if_neg_1(mq_unlink(que_name));
+```
+### baht
+For me it is looks simple, elegant and doesn't distract from actual code:
+```c
+close(stream_socket) BAHT_IS_NEG_1_ERRNO;
+unlink(sock_path) BAHT_IS_NEG_1_ERRNO;
+mq_close(que_id) BAHT_IS_NEG_1_ERRNO;
+mq_unlink(que_name) BAHT_IS_NEG_1_ERRNO;
+```
+
