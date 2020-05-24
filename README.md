@@ -1,4 +1,5 @@
-baht([bäxt] - 'luck' in [talysh](https://en.wikipedia.org/wiki/Talysh_language) language) is single-file library to ease 
+## baht
+baht(/bäxt/ - 'luck' in [talysh](https://en.wikipedia.org/wiki/Talysh_language) language) is single-file library to ease 
 development process by providing a set of error-checking macros. Also, baht includes a signal handler, to suspend program 
 execution on signal arrival.
 
